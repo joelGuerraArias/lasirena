@@ -2,7 +2,11 @@
 
 ## ✅ Sistema de Configuración Actualizado
 
-Las API keys ahora se guardan en un archivo **`config.json`** en la raíz del proyecto.
+Las API keys se guardan **permanentemente** y persisten incluso cuando cierras y abres la aplicación.
+
+### 🔄 Sistema de Persistencia:
+1. **localStorage del navegador** (prioritario) - Se guarda automáticamente cuando ingresas keys por la UI
+2. **config.json** (opcional) - Para configuración inicial en desarrollo
 
 ## 📝 Cómo Configurar tus API Keys
 
@@ -54,15 +58,18 @@ El archivo `config.json` ya existe en la raíz del proyecto. Solo necesitas edit
 }
 ```
 
-## 🆘 Método Alternativo (UI)
+## 🆘 Método Recomendado: Usar la UI (Más Fácil)
 
-Si prefieres no editar el archivo, también puedes:
+**Este método guarda las keys PERMANENTEMENTE:**
 
 1. Hacer clic en el botón rojo "Configure API Key" en el header de la app
 2. Ingresar tu API key manualmente
-3. Se guardará en el localStorage del navegador
+3. Hacer clic en "Save API Key"
+4. ✅ **Las keys se guardan en localStorage del navegador y persisten para siempre**
 
-**Nota**: El método del archivo `config.json` tiene prioridad sobre localStorage.
+**Ventaja**: No necesitas editar archivos, las keys se guardan automáticamente.
+
+**Nota**: Las keys guardadas por la UI tienen prioridad sobre config.json.
 
 ## 📂 Ubicación del Archivo
 
@@ -76,12 +83,24 @@ la-sirena-clean/
 └── ...
 ```
 
-## ✨ Ventajas del Nuevo Sistema
+## ✨ Ventajas del Sistema
 
-- ✅ No necesitas ingresar las keys cada vez
-- ✅ Fácil de cambiar entre diferentes keys
-- ✅ Más seguro que guardar en el código
-- ✅ Compatible con múltiples proyectos
+- ✅ **Persistencia automática** - Las keys se guardan para siempre en localStorage
+- ✅ **No necesitas ingresar las keys cada vez** - Se cargan automáticamente
+- ✅ **Fácil de actualizar** - Usa la UI para cambiar keys cuando quieras
+- ✅ **Más seguro** - localStorage no se sube a GitHub
+- ✅ **Funciona sin archivos** - No necesitas editar config.json si usas la UI
+
+## 🔒 ¿Dónde se Guardan las Keys?
+
+Cuando usas la UI para guardar las keys, se almacenan en **localStorage del navegador**:
+- ✅ **Persisten para siempre** (no se borran al cerrar el navegador)
+- ✅ **Solo en tu computadora** (no se envían a ningún servidor)
+- ✅ **Específicas del dominio** (cada proyecto tiene sus propias keys)
+
+Para borrar las keys, puedes:
+1. Hacer clic en el botón verde "Gemini Connected" o "Wavespeed Connected"
+2. O limpiar el localStorage del navegador
 
 ---
 

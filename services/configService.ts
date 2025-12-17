@@ -34,42 +34,50 @@ export const loadConfig = async (): Promise<Config> => {
 
 /**
  * Get Gemini API Key from config
+ * Priority: localStorage > config.json > environment
  */
 export const getGeminiApiKey = async (): Promise<string> => {
-  const config = await loadConfig();
-  
-  // First try config file
-  if (config.gemini_api_key && config.gemini_api_key.trim()) {
-    return config.gemini_api_key.trim();
+  // First try localStorage (persists between sessions, priority for user-entered keys)
+  const storedKey = localStorage.getItem('gemini_api_key');
+  if (storedKey && storedKey.trim()) {
+    return storedKey.trim();
   }
   
-  // Fallback to localStorage (for backward compatibility)
-  const storedKey = localStorage.getItem('gemini_api_key');
-  if (storedKey) return storedKey;
+  // Then try config file (for initial setup)
+  const config = await loadConfig();
+  if (config.gemini_api_key && config.gemini_api_key.trim()) {
+    // Save to localStorage for persistence
+    localStorage.setItem('gemini_api_key', config.gemini_api_key.trim());
+    return config.gemini_api_key.trim();
+  }
   
   // Fallback to environment variable
   const envKey = process.env.API_KEY;
   if (envKey) return envKey;
   
-  throw new Error("Gemini API Key not found. Please add it to config.json in the project root.");
+  throw new Error("Gemini API Key not found. Please add it via the UI or in config.json.");
 };
 
 /**
  * Get Wavespeed API Key from config
+ * Priority: localStorage > config.json
  */
 export const getWavespeedApiKey = async (): Promise<string> => {
-  const config = await loadConfig();
+  // First try localStorage (persists between sessions, priority for user-entered keys)
+  const storedKey = localStorage.getItem('wavespeed_api_key');
+  if (storedKey && storedKey.trim()) {
+    return storedKey.trim();
+  }
   
-  // First try config file
+  // Then try config file (for initial setup)
+  const config = await loadConfig();
   if (config.wavespeed_api_key && config.wavespeed_api_key.trim()) {
+    // Save to localStorage for persistence
+    localStorage.setItem('wavespeed_api_key', config.wavespeed_api_key.trim());
     return config.wavespeed_api_key.trim();
   }
   
-  // Fallback to localStorage (for backward compatibility)
-  const storedKey = localStorage.getItem('wavespeed_api_key');
-  if (storedKey) return storedKey;
-  
-  throw new Error("Wavespeed API Key not found. Please add it to config.json in the project root.");
+  throw new Error("Wavespeed API Key not found. Please add it via the UI or in config.json.");
 };
 
 /**
