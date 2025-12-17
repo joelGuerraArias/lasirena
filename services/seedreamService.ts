@@ -1,26 +1,19 @@
 import { FileData } from '../types';
-
-// Get Wavespeed API Key from localStorage
-const getWavespeedApiKey = (): string => {
-  const storedKey = localStorage.getItem('wavespeed_api_key');
-  if (storedKey) return storedKey;
-  
-  throw new Error("Wavespeed API Key not found. Please configure your Wavespeed API Key.");
-};
+import { getWavespeedApiKey as getWavespeedApiKeyFromConfig, hasWavespeedApiKey as hasWavespeedApiKeyFromConfig, saveApiKeyToLocalStorage, clearApiKeyFromLocalStorage } from './configService';
 
 // Save Wavespeed API Key
 export const saveWavespeedApiKey = (apiKey: string) => {
-  localStorage.setItem('wavespeed_api_key', apiKey);
+  saveApiKeyToLocalStorage('wavespeed', apiKey);
 };
 
 // Check if Wavespeed API Key exists
-export const hasWavespeedApiKey = (): boolean => {
-  return !!localStorage.getItem('wavespeed_api_key');
+export const hasWavespeedApiKey = async (): Promise<boolean> => {
+  return await hasWavespeedApiKeyFromConfig();
 };
 
 // Clear Wavespeed API Key
 export const clearWavespeedApiKey = () => {
-  localStorage.removeItem('wavespeed_api_key');
+  clearApiKeyFromLocalStorage('wavespeed');
 };
 
 // Upload image to get URL (SeeDream requires image URLs)
@@ -40,7 +33,7 @@ export const generateSeeDreamTryOn = async (
   shoes: FileData | null,
   poseIndex: number = 0
 ): Promise<string> => {
-  const apiKey = getWavespeedApiKey();
+  const apiKey = await getWavespeedApiKeyFromConfig();
   
   // Build the prompt for SeeDream
   let prompt = `Virtual try-on: Keep the person's exact face, body, and features unchanged. `;
@@ -155,7 +148,7 @@ export const generateFluxTryOn = async (
   shoes: FileData | null,
   poseIndex: number = 0
 ): Promise<string> => {
-  const apiKey = getWavespeedApiKey();
+  const apiKey = await getWavespeedApiKeyFromConfig();
   
   // Build the prompt for Flux 2 Pro
   let prompt = `Transform this person into a high-end fashion editorial portrait. `;

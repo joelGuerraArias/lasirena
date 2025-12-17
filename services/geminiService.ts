@@ -1,40 +1,26 @@
 import { GoogleGenAI } from "@google/genai";
 import { FileData } from '../types';
-
-// Get API Key from localStorage or environment
-const getApiKey = (): string => {
-  // First try localStorage
-  const storedKey = localStorage.getItem('gemini_api_key');
-  if (storedKey) return storedKey;
-  
-  // Fallback to environment variable
-  const envKey = process.env.API_KEY;
-  if (envKey) return envKey;
-  
-  throw new Error("API Key not found. Please configure your API Key.");
-};
+import { getGeminiApiKey, hasGeminiApiKey, saveApiKeyToLocalStorage, clearApiKeyFromLocalStorage } from './configService';
 
 // We use a fresh instance creation inside functions to ensure we capture the latest API Key
-const getAIClient = () => {
-  const apiKey = getApiKey();
+const getAIClient = async () => {
+  const apiKey = await getGeminiApiKey();
   return new GoogleGenAI({ apiKey });
 };
 
 // Save API Key to localStorage
 export const saveApiKey = (apiKey: string) => {
-  localStorage.setItem('gemini_api_key', apiKey);
+  saveApiKeyToLocalStorage('gemini', apiKey);
 };
 
 // Check if API Key exists
-export const hasApiKey = (): boolean => {
-  const storedKey = localStorage.getItem('gemini_api_key');
-  const envKey = process.env.API_KEY;
-  return !!(storedKey || envKey);
+export const hasApiKey = async (): Promise<boolean> => {
+  return await hasGeminiApiKey();
 };
 
 // Clear API Key
 export const clearApiKey = () => {
-  localStorage.removeItem('gemini_api_key');
+  clearApiKeyFromLocalStorage('gemini');
 };
 
 // 4 different elegant poses with the SAME outfit
@@ -103,7 +89,7 @@ export const generateTryOnImage = async (
   shoes: FileData | null,
   poseIndex: number = 0
 ): Promise<string> => {
-  const ai = getAIClient();
+  const ai = await getAIClient();
   const pose = ELEGANT_POSES[poseIndex % ELEGANT_POSES.length];
   
   // Construct the prompt and parts
@@ -268,7 +254,7 @@ export const generateFashionVideo = async (
   imageBase64: string, // This expects the raw base64 string without data prefix, or we strip it
   mimeType: string = 'image/png'
 ): Promise<string> => {
-  const ai = getAIClient();
+  const ai = await getAIClient();
 
   // Strip prefix if present
   const cleanBase64 = imageBase64.includes('base64,') 

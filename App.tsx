@@ -71,9 +71,11 @@ const App: React.FC = () => {
     setCustomClothes(clothes);
   };
 
-  const checkApiKey = () => {
-    setHasKey(hasApiKey());
-    setHasWavespeedKey(hasWavespeedApiKey());
+  const checkApiKey = async () => {
+    const geminiKey = await hasApiKey();
+    const wavespeedKey = await hasWavespeedApiKey();
+    setHasKey(geminiKey);
+    setHasWavespeedKey(wavespeedKey);
   };
 
   const handleSaveApiKey = () => {
