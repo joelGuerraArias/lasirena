@@ -87,6 +87,12 @@ export const generateSeeDreamTryOn = async (
     
     console.log('SeeDream API Response:', data); // Debug log
     
+    // New Wavespeed API structure (data.id, data.urls.get)
+    if (data.data && data.data.id && data.data.urls && data.data.urls.get) {
+      console.log('Using new Wavespeed API structure with polling URL:', data.data.urls.get);
+      return await pollWavespeedPrediction(apiKey, data.data.urls.get);
+    }
+    
     // Check if we got base64 output
     if (data.base64_output) {
       return `data:image/png;base64,${data.base64_output}`;
@@ -241,7 +247,55 @@ export const generateFluxTryOn = async (
 };
 
 /**
- * Poll Wavespeed job result (for async mode) - Works for both Flux and SeeDream
+ * Poll Wavespeed prediction result using the GET URL from the API
+ */
+const pollWavespeedPrediction = async (apiKey: string, getUrl: string): Promise<string> => {
+  const maxAttempts = 60; // 5 minutes max (5 seconds * 60)
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+    
+    try {
+      const response = await fetch(getUrl, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to check prediction status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log(`Wavespeed prediction status (attempt ${i + 1}):`, result);
+      
+      // New API structure: data.outputs contains the result images
+      if (result.data && result.data.outputs && result.data.outputs.length > 0) {
+        const imageUrl = result.data.outputs[0];
+        console.log('Image ready, downloading from:', imageUrl);
+        
+        const imgResponse = await fetch(imageUrl);
+        const blob = await imgResponse.blob();
+        return URL.createObjectURL(blob);
+      }
+      
+      // Check if there's an error
+      if (result.data && result.data.status === 'failed') {
+        throw new Error(`Wavespeed prediction failed: ${result.data.error || 'Unknown error'}`);
+      }
+      
+      // Continue polling if outputs is still empty (processing)
+    } catch (error: any) {
+      console.error('Error polling Wavespeed prediction:', error);
+      throw error;
+    }
+  }
+  
+  throw new Error('Wavespeed generation timed out after 5 minutes');
+};
+
+/**
+ * Poll Wavespeed job result (for async mode) - Works for both Flux and SeeDream (old API)
  */
 const pollWavespeedJob = async (apiKey: string, jobId: string): Promise<string> => {
   const maxAttempts = 60; // 5 minutes max (5 seconds * 60)
