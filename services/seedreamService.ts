@@ -60,8 +60,8 @@ export const generateSeeDreamTryOn = async (
   ];
   prompt += poses[poseIndex % poses.length];
   
-  // Get person image URL (SeeDream requires URLs)
-  const personUrl = person.previewUrl;
+  // Convert image to base64 data URL (Wavespeed needs accessible URLs or base64)
+  const imageBase64 = `data:${person.mimeType};base64,${person.base64}`;
   
   try {
     const response = await fetch('https://api.wavespeed.ai/api/v3/bytedance/seedream-v4.5/edit', {
@@ -73,7 +73,7 @@ export const generateSeeDreamTryOn = async (
       body: JSON.stringify({
         enable_base64_output: false,
         enable_sync_mode: false, // Use async mode
-        images: [personUrl],
+        images: [imageBase64],  // Send as base64 data URL instead of blob URL
         prompt: prompt
       })
     });
@@ -212,6 +212,12 @@ export const generateFluxTryOn = async (
     const data = await response.json();
     
     console.log('Flux API Response:', data); // Debug log
+    
+    // New Wavespeed API structure (data.id, data.urls.get)
+    if (data.data && data.data.id && data.data.urls && data.data.urls.get) {
+      console.log('Using new Wavespeed API structure with polling URL:', data.data.urls.get);
+      return await pollWavespeedPrediction(apiKey, data.data.urls.get);
+    }
     
     // Check if we got base64 output
     if (data.base64_output) {
